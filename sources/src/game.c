@@ -9,6 +9,7 @@
 #include <misc.h>
 #include <window.h>
 #include <sprite.h>
+#include <bomb.h>
 
 struct game {
 	struct map** maps;       // the game's map
@@ -24,6 +25,8 @@ game_new(void) {
 	struct game* game = malloc(sizeof(*game));
 	game->maps = malloc(sizeof(struct game));
 	game->maps[0] = map_get_static();
+	game->maps[1] = map_get_static_2();
+	game->maps[2] = map_get_static_3();
 	game->levels = 1;
 	game->level = 0;
 
@@ -126,6 +129,8 @@ static short input_keyboard(struct game* game) {
 				player_move(player, map);
 				break;
 			case SDLK_SPACE:
+				printf("drop_bomb\n");
+				drop_bomb(game, map);
 				break;
 			default:
 				break;
@@ -138,8 +143,33 @@ static short input_keyboard(struct game* game) {
 }
 
 int game_update(struct game* game) {
+	
+	struct player* player = game_get_player(game);
+	struct map *map = game_get_current_map(game);
+
 	if (input_keyboard(game))
 		return 1; // exit game
-
+	
+	if(player_get_door(game, map, player)){
+		game->level++;
+	}
+	
+	bomb_update(map, player);
+	explosion_update(map);
+	
 	return 0;
 }
+
+
+int player_get_door(struct game *game, struct map *map, struct player *player){
+	
+	int x = player_get_x(player);
+	int y = player_get_y(player);
+
+	if(map_get_cell_type(map, x, y) == CELL_DOOR){
+		return 1;
+	}
+	return 0;
+
+}
+

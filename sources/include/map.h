@@ -5,6 +5,8 @@
 #ifndef MAP_H_
 #define MAP_H_
 
+#include <bomb.h>
+
 enum cell_type {
 	CELL_EMPTY=0x00,   		//  0000 0000
 	CELL_SCENERY=0x10, 		//  0001 0000
@@ -26,6 +28,15 @@ enum bonus_type {
 	BONUS_LIFE
 };
 
+enum bomb_type {
+	BOMB_1 = 1, // 0001
+	BOMB_2 = 2, // 0010
+	BOMB_3 = 4, // 0100
+	BOMB_4 = 8, // 1000
+	BOMB_EXPLOSION = 9 // 1001
+};
+
+
 enum scenery_type {
 	SCENERY_STONE = 1,    // 0001 
 	SCENERY_TREE  = 2,    // 0010 
@@ -43,9 +54,13 @@ enum compose_type {
     CELL_BOX_BOMBDEC  = CELL_BOX | BONUS_BOMB_NB_INC,
     CELL_BOX_LIFE     = CELL_BOX | BONUS_MONSTER,
     CELL_BOX_MONSTER  = CELL_BOX | BONUS_LIFE,
-};
 
-struct map;
+	CELL_BOMB_1 = CELL_BOMB | BOMB_1,
+	CELL_BOMB_2 = CELL_BOMB | BOMB_2,
+	CELL_BOMB_3 = CELL_BOMB | BOMB_3,
+	CELL_BOMB_4 = CELL_BOMB | BOMB_4,
+	CELL_EXPLOSION = CELL_BOMB | BOMB_EXPLOSION,
+};
 
 // Create a new empty map
 struct map* map_new(int width, int height);
@@ -67,8 +82,22 @@ int map_is_inside(struct map* map, int x, int y);
 
 // Return a default static map
 struct map* map_get_static();
+struct map* map_get_static_2();
+struct map* map_get_static_3();
 
 // Display the map on the screen
 void map_display(struct map* map);
+
+// bombs
+
+void bomb_display(struct map *map, int i, int j, unsigned char type);
+
+struct explosion *map_get_tab_explosion(struct map *map);
+
+
+// Move the player according to the current direction
+int player_move(struct player* player, struct map*);
+
+
 
 #endif /* MAP_H_ */

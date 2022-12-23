@@ -2,6 +2,7 @@
  * This file is part of Bombeirb.
  * Copyright (C) 2018 by Laurent Réveillère
  ******************************************************************************/
+
 #ifndef SPRITE_H_
 #define SPRITE_H_
 
@@ -10,10 +11,10 @@
 #include <constant.h>
 
 // load game's sprites
-void		 sprite_load();
+void sprite_load();
 
 SDL_Surface* sprite_get_player(enum direction direction);
-SDL_Surface* sprite_get_bonus(enum bonus_type bonus_type);
+//SDL_Surface* sprite_get_bonus(enum bonus_type bonus_type);
 SDL_Surface* sprite_get_tree();
 SDL_Surface* sprite_get_box();
 SDL_Surface* sprite_get_key();
@@ -26,5 +27,11 @@ SDL_Surface* sprite_get_banner_life();
 SDL_Surface* sprite_get_banner_bomb();
 SDL_Surface* sprite_get_banner_line();
 SDL_Surface* sprite_get_banner_range();
+
+//SDL_Surface* sprite_get_monster(enum direction direction);
+SDL_Surface* sprite_get_bombs(int);
+SDL_Surface* sprite_get_explosion();
+//SDL_Surface* sprite_get_bonus_bomb(enum bonus_type bonus_type);
+//SDL_Surface* sprite_get_bonus_life();
 
 #endif /* SPRITE_H_ */

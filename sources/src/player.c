@@ -10,12 +10,10 @@
 #include <window.h>
 #include <misc.h>
 #include <constant.h>
+#include <bomb.h>
+#include <player.h>
 
-struct player {
-	int x, y;
-	enum direction direction;
-	int bombs;
-};
+
 
 struct player* player_init(int bombs) {
 	struct player* player = malloc(sizeof(*player));

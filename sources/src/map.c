@@ -13,12 +13,17 @@
 #include <misc.h>
 #include <sprite.h>
 #include <window.h>
+#include <map.h>
+#include <bomb.h>
 
 struct map {
 	int width;
 	int height;
 	unsigned char* grid;
+	struct bomb *bomb_tab;
+	struct explosion *explosion_tab;
 };
+
 
 #define CELL(i,j) ( (i) + (j) * map->width)
 
@@ -44,8 +49,55 @@ struct map* map_new(int width, int height)
 	  for (j = 0; j < height; j++)
 	    map->grid[CELL(i,j)] = CELL_EMPTY;
 
+	map->bomb_tab = malloc(9*sizeof(struct bomb*));
+	map->explosion_tab = malloc(9*sizeof(struct explosion*));
+	bombs_init_tab(map->bomb_tab);
+	explosion_init_tab(map->explosion_tab);
+	
+	
+	
 	return map;
 }
+
+// bomb
+
+struct bomb *map_get_tab_bombs(struct map *map){
+	assert(map);
+	return map->bomb_tab;
+}
+
+struct explosion *map_get_tab_explosion(struct map *map){
+	assert(map);
+	return map->explosion_tab;	
+}
+
+void bomb_display(struct map *map, int x, int y, unsigned char type){
+
+        assert(map != NULL);
+		assert(map->height > 0 && map->width > 0);
+		
+		switch (type & 0x0f) {
+
+		case BOMB_1:
+			window_display_image(sprite_get_bombs(0), x, y); 
+			break;
+		case BOMB_2:
+			window_display_image(sprite_get_bombs(1), x, y); 
+			break;
+		case BOMB_3:
+			window_display_image(sprite_get_bombs(2), x, y); 
+			break;
+		case BOMB_4:
+			window_display_image(sprite_get_bombs(3), x, y); 
+			break;
+		case BOMB_EXPLOSION:
+			bomb_explosion(map, x, y);
+			//window_display_image(sprite_get_bombs(3), x * SIZE_BLOC, y * SIZE_BLOC); 
+			break;
+
+		}
+	}
+
 
 int map_is_inside(struct map* map, int x, int y)
 {
@@ -84,7 +136,7 @@ void map_set_cell_type(struct map* map, int x, int y, enum cell_type type)
 	assert(map && map_is_inside(map, x, y));
 	map->grid[CELL(x,y)] = type;
 }
-
+/*
 void display_bonus(struct map* map, int x, int y, unsigned char type)
 {
 	// bonus is encoded with the 4 most significant bits
@@ -106,6 +158,7 @@ void display_bonus(struct map* map, int x, int y, unsigned char type)
 		break;
 	}
 }
+*/
 
 void display_scenery(struct map* map, int x, int  y, unsigned char type)
 {
@@ -137,12 +190,15 @@ void map_display(struct map* map)
 		case CELL_SCENERY:
 		  display_scenery(map, x, y, type);
 		  break;
-	    case CELL_BOX:
+		case CELL_BOMB:
+			bomb_display(map, x, y, type);
+			break;
+		case CELL_BOX:
 	      window_display_image(sprite_get_box(), x, y);
 	      break;
-	    case CELL_BONUS:
-	      display_bonus(map, x, y, type);
-	      break;
+	    //case CELL_BONUS:
+	      //display_bonus(map, x, y, type);
+	      //break;
 	    case CELL_KEY:
 	      window_display_image(sprite_get_key(), x, y);
 	      break;
@@ -179,3 +235,129 @@ struct map* map_get_static(void)
 
 	return map;
 }
+
+
+struct map* map_get_static_2(void)
+{
+	FILE *f;
+  	int length;
+  	int width;
+  	int next_map[150];
+  	int size;
+  	int i;
+
+  	f = fopen("map_2","r");
+
+  	if(f==NULL){
+    	printf("Unable to open the field\n");
+  	}
+
+  	fscanf(f, "%d:%d", &length, &width);
+
+  	size = length*width;
+
+	
+  	for(i=0; i<size; i++)
+  	{	
+		next_map[i] = 0;
+  	}
+	
+
+	for(i=0; i<size; i++){
+		fscanf(f, "%d", &next_map[i]);
+	}
+	
+
+	struct map* map = map_new(width, length);
+
+	for ( int i = 0; i < size; i++){
+		switch(next_map[i]){
+
+			case(0):
+				map->grid[i] = CELL_EMPTY;
+			break;
+
+			case(17):
+				map->grid[i] = CELL_STONE;
+			break;
+
+            case(18):
+				map->grid[i] = CELL_TREE;
+			break;
+
+			case(48): // 110000
+				map->grid[i] = CELL_DOOR;
+			break;
+
+
+		}
+	}
+		
+	for (int i = 0; i < size; i++)
+		map->grid[i] = next_map[i];
+
+	return map;
+
+
+
+  	fclose(f);
+}
+
+
+struct map* map_get_static_3(void)
+{
+	FILE *f;
+  	int length;
+  	int width;
+  	int next_map[150];
+  	int size;
+  	int i;
+
+  	f = fopen("map_3","r");
+
+  	if(f==NULL){
+    	printf("Unable to open the field\n");
+  	}
+
+  	fscanf(f, "%d:%d", &length, &width);
+
+  	size = length*width;
+	
+  	for(i=0; i<size; i++)
+  	{	
+		next_map[i] = 0;
+  	}
+	
+	for(i=0; i<size; i++){
+		fscanf(f, "%d", &next_map[i]);
+	}
+
+  	fclose(f);
+
+	struct map* map = map_new(width, length);
+
+	for ( int i = 0; i < size; i++){
+		switch(next_map[i]){
+
+			case(0):
+				map->grid[i] = CELL_EMPTY;
+			break;
+
+			case(17):
+				map->grid[i] = CELL_STONE;
+			break;
+
+            case(18):
+				map->grid[i] = CELL_TREE;
+			break;
+		}
+	}
+		
+		
+
+	for (int i = 0; i < size; i++)
+		map->grid[i] = next_map[i];
+
+	return map;
+}
+
